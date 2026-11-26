@@ -1,0 +1,41 @@
+.agents
+.claude
+.codex
+.vscode
+.zed
+.env
+AGENTS.override.md
+CLAUDE.local.md
+
+# Environment files
+.env.*
+!.env.example
+
+# Node.js / Next.js / Vercel
+node_modules/
+.next/
+out/
+.vercel/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python / uv (pipeline)
+pipeline/.venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Raw geospatial downloads (keep .gitkeep)
+pipeline/raw/*
+!pipeline/raw/.gitkeep
+
+# OS / Editor backups
+.DS_Store
+*.swp
+.idea/
+
+# Supabase local temp state
+supabase/.temp/
+supabase/.branches/

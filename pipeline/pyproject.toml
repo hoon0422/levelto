@@ -1,0 +1,35 @@
+[project]
+name = "levelto-pipeline"
+version = "0.1.0"
+description = "Offline geospatial preprocessing pipeline for LevelTO (Open Toronto + NRCan HRDEM + GTFS + OSM)."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "geopandas>=1.0",
+  "rasterio>=1.4",
+  "shapely>=2.0",
+  "pyproj>=3.6",
+  "numpy>=2.0",
+  "requests>=2.32",
+  "pydantic>=2.9",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/levelto_pipeline"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
