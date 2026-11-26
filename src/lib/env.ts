@@ -12,6 +12,7 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID: z.string().trim().min(1).default("DEMO_MAP_ID"),
   NEXT_PUBLIC_SUPABASE_URL: z.string().trim().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: nonEmptyOptional,
+  NEXT_PUBLIC_TILES_BASE_URL: z.string().trim().url().optional(),
 });
 
 const serverEnvSchema = z.object({
@@ -31,6 +32,7 @@ export function getPublicEnv(): PublicEnv {
     NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || undefined,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || undefined,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_TILES_BASE_URL: process.env.NEXT_PUBLIC_TILES_BASE_URL || undefined,
   });
 }
 

@@ -8,7 +8,7 @@ Help wheelchair users and people with limited mobility navigate Toronto safely b
 
 ## Architecture Overview
 
-- **Pedestrian Graph & Tiling (`pipeline/` -> `public/data/tiles/`)**: Offline Python preprocessing joins Open Toronto's Pedestrian Network (87,105 edges) with NRCan HRDEM 1m DTM bare-earth elevation, filtered OSM `highway=steps`, and Traffic Signals (APS) into 2km x 2km static JSON tiles. Cross-border edges are duplicated cleanly across adjacent tiles and deduplicated on client load.
+- **Pedestrian Graph & Tiling (`pipeline/` -> Supabase Storage `pedestrian-tiles`)**: Offline Python preprocessing joins Open Toronto's Pedestrian Network (87,105 edges) with NRCan HRDEM 1m DTM bare-earth elevation, filtered OSM `highway=steps`, and Traffic Signals (APS) into 2km x 2km static JSON tiles. Cross-border edges are duplicated cleanly across adjacent tiles and deduplicated on client load.
 - **Pure Client/Edge Routing (`src/lib/routing/`)**: Directional A*/Dijkstra computes mobility-preset-aware routes (`manual`, `power`, `mobility_aid`) using only local 3x3 tiles in browser memory — allowing instant zero-API re-ranking and re-routing when presets or barrier toggles change.
 - **Hybrid TTC Transit Stitching (`POST /api/transit` + `src/lib/transit/`)**: Queries Google Routes API (`TRANSIT` mode, Essentials `X-Goog-FieldMask`), verifies boarding/alighting stops within 50m against Open Toronto TTC GTFS `stops.txt` (`wheelchair_boarding`), and replaces every `WALK` leg with local wheelchair A*.
 - **Live Barriers & Quota Protection (`supabase/` + `/api/*`)**: Planned Supabase PostgreSQL + PostGIS schema for crowdsourced barrier/ramp reports and server-side daily API quota guards (migrations to be added in `supabase/migrations/`).
@@ -37,7 +37,7 @@ Detailed dataset audit: [docs/research/open-toronto-datasets.md](docs/research/o
 ## Folder Structure
 
 - `src/` — Next.js App Router pages, `/api/*` proxies, UI components, pure TS routing/scoring/tile modules
-- `public/data/` — Generated tile index, 2x2km pedestrian tiles, TTC stops, municipal washrooms JSON
+- `public/data/` — TTC stops and municipal washrooms JSON; `tiles/` is a gitignored local staging dir for pedestrian tiles uploaded to Supabase Storage
 - `pipeline/` — Offline Python (`uv`) data ingestion, DTM slope enrichment, and tiling scripts
 - `supabase/` — PostGIS SQL migrations and config
 - `docs/` — Architecture Decision Records (`adr/`), dataset research (`research/`), submission notes (`submission/`)

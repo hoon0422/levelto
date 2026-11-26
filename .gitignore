@@ -31,6 +31,10 @@ pipeline/.venv/
 pipeline/raw/*
 !pipeline/raw/.gitkeep
 
+# Generated pedestrian tiles are served from Supabase Storage (bucket: pedestrian-tiles)
+public/data/tiles/*
+!public/data/tiles/.gitkeep
+
 # OS / Editor backups
 .DS_Store
 *.swp

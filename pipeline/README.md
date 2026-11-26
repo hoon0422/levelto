@@ -15,6 +15,14 @@ uv run --directory pipeline ruff check .
 uv run --directory pipeline python -c "import geopandas, rasterio, shapely, pyproj, requests, levelto_pipeline; print('PIPELINE_OK')"
 ```
 
+## Upload Tiles
+
+Tiles are not committed. After building into `../public/data/tiles/`, upload them to the public Supabase Storage bucket `pedestrian-tiles` (reads `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from `../.env`):
+
+```bash
+uv run --directory pipeline python scripts/upload_tiles.py
+```
+
 ## Planned Datasets (`raw/` is gitignored)
 
 - Open Toronto Pedestrian Network (87,105 edges)

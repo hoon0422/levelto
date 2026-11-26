@@ -24,7 +24,7 @@ Target event: **Toronto Open Data Awards 2026** (submission deadline: **2026-12-
 ## Architecture Invariants
 
 1. **Static Pedestrian Tiles + Client Routing**:
-   - The Open Toronto Pedestrian Network (`87,105` edges) enriched with NRCan HRDEM 1m DTM elevation/slopes and filtered OSM `highway=steps` is generated offline in `pipeline/` as 2km x 2km static JSON tiles under `public/data/tiles/`.
+   - The Open Toronto Pedestrian Network (`87,105` edges) enriched with NRCan HRDEM 1m DTM elevation/slopes and filtered OSM `highway=steps` is generated offline in `pipeline/` as 2km x 2km static JSON tiles, staged locally in `public/data/tiles/` (gitignored) and uploaded to the public Supabase Storage bucket `pedestrian-tiles` via `pipeline/scripts/upload_tiles.py`. The client fetches tiles from `NEXT_PUBLIC_TILES_BASE_URL`.
    - Client/pure routing logic lives in `src/lib/routing/` with zero DOM dependencies so it runs cleanly in both browser and unit tests.
    - Do NOT store the pedestrian graph in PostgreSQL/PostGIS.
 2. **Supabase PostGIS Scope**:
