@@ -1,12 +1,13 @@
 "use client";
 
-import { Building2, Coffee, Utensils, type LucideIcon } from "lucide-react";
+import { Building2, Coffee, ShoppingBasket, Utensils, type LucideIcon } from "lucide-react";
 import { CATEGORY_LABEL, type PlaceCategory } from "@/app/api/places/nearby/categories";
 
 const CHIPS: { id: PlaceCategory; Icon: LucideIcon }[] = [
   { id: "restaurant", Icon: Utensils },
   { id: "cafe", Icon: Coffee },
   { id: "public", Icon: Building2 },
+  { id: "grocery", Icon: ShoppingBasket },
 ];
 
 type Props = { value: PlaceCategory | null; onChange: (c: PlaceCategory | null) => void };

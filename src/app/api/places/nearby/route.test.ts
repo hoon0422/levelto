@@ -11,6 +11,18 @@ const call = (body: unknown) =>
   );
 const base = { origin: { lat: 43.67, lng: -79.38 }, radiusM: 1000 };
 
+it("keeps the agreed Google type lists", () => {
+  expect(CATEGORY_TYPES.public).toEqual([
+    "library",
+    "community_center",
+    "city_hall",
+    "post_office",
+    "pharmacy",
+    "park",
+  ]);
+  expect(CATEGORY_TYPES.grocery).toEqual(["supermarket", "grocery_store", "convenience_store"]);
+});
+
 describe("POST /api/places/nearby", () => {
   beforeEach(() => {
     vi.stubEnv("GOOGLE_MAPS_SERVER_API_KEY", "test-key");
