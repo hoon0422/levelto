@@ -10,12 +10,18 @@ import type { LatLng } from "@/lib/routing/types";
 
 const BLOOR_YONGE: LatLng = { lat: 43.6709, lng: -79.3857 };
 
+/** Dev only: ?fixture=unroutable|outOfCoverage swaps the fake result to preview the failure screens. */
+function fixtureKey(): keyof typeof FIXTURE_ROUTES {
+  const q = new URLSearchParams(window.location.search).get("fixture");
+  return q === "unroutable" || q === "outOfCoverage" ? q : "ok";
+}
+
 /** App state and layout: results panel first in DOM (keyboard/screen reader), map shown on top on mobile. */
 export function AppShell() {
   const [origin] = useState<LatLng>(BLOOR_YONGE); // origin picker comes later
   const [place, setPlace] = useState<SelectedPlace | null>(null);
   // shortcut: same fixture route for every place, swap for the real router when src/lib/routing lands
-  const route = place ? FIXTURE_ROUTES.ok : null;
+  const route = place ? FIXTURE_ROUTES[fixtureKey()] : null;
 
   return (
     <div className="flex h-dvh flex-col-reverse md:flex-row">
