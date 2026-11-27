@@ -4,7 +4,7 @@ import { z } from "zod";
 export const CATEGORY_TYPES = {
   restaurant: ["restaurant"],
   cafe: ["cafe", "coffee_shop"],
-  public: ["library", "community_center", "city_hall", "post_office", "pharmacy", "park"],
+  public: ["library", "community_center", "city_hall", "post_office", "pharmacy"],
   grocery: ["supermarket", "grocery_store", "convenience_store"],
 } as const;
 

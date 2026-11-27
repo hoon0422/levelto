@@ -18,7 +18,6 @@ it("keeps the agreed Google type lists", () => {
     "city_hall",
     "post_office",
     "pharmacy",
-    "park",
   ]);
   expect(CATEGORY_TYPES.grocery).toEqual(["supermarket", "grocery_store", "convenience_store"]);
 });
