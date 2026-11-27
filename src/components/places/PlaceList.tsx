@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { CATEGORY_LABEL, type PlaceCategory } from "@/app/api/places/nearby/categories";
 import { Check, CircleHelp, X } from "lucide-react";
 import type { LatLng } from "@/lib/routing/types";
 import {
@@ -15,12 +16,18 @@ import {
 
 export type SelectedPlace = { id: string; name: string; location: LatLng };
 
-type Props = { origin: LatLng; onSelect: (place: SelectedPlace) => void };
+type Props = {
+  origin: LatLng;
+  category: PlaceCategory | null;
+  onSelect: (place: SelectedPlace) => void;
+  /** Ranked places as shown in the list, for numbered map markers. */
+  onRanked?: (places: SelectedPlace[]) => void;
+};
 
 type ApiPlace = Pick<PlaceCandidate, "id" | "name" | "location" | "entrance" | "washroom">;
-type Loaded =
-  | { origin: LatLng; status: "error"; message: string }
-  | { origin: LatLng; status: "ready"; places: ApiPlace[] };
+type Loaded = { origin: LatLng; category: PlaceCategory } & (
+  { status: "error"; message: string } | { status: "ready"; places: ApiPlace[] }
+);
 
 const RADIUS_M = 1000;
 
@@ -39,38 +46,40 @@ function AccessBadge({ label, value }: { label: string; value: Access }) {
   );
 }
 
-export function PlaceList({ origin, onSelect }: Props) {
+export function PlaceList({ origin, category, onSelect, onRanked }: Props) {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   // Loading = no result yet for the current origin.
-  const state = loaded && loaded.origin === origin ? loaded : null;
+  const state = loaded && loaded.origin === origin && loaded.category === category ? loaded : null;
   const [needWashroom, setNeedWashroom] = useState(false);
 
   useEffect(() => {
+    if (!category) return; // no request until a chip is chosen (quota)
     const ctrl = new AbortController();
     fetch("/api/places/nearby", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ origin, radiusM: RADIUS_M }),
+      body: JSON.stringify({ category, origin, radiusM: RADIUS_M }),
       signal: ctrl.signal,
     })
       .then(async (res) => {
         const json = await res.json().catch(() => null);
         if (!res.ok) throw new Error(json?.error?.message ?? `Request failed (${res.status}).`);
-        setLoaded({ origin, status: "ready", places: json.places });
+        setLoaded({ origin, category, status: "ready", places: json.places });
       })
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
         setLoaded({
           origin,
+          category,
           status: "error",
           message: e instanceof Error ? e.message : "Could not load nearby places.",
         });
       });
     return () => ctrl.abort();
-  }, [origin]);
+  }, [origin, category]);
 
   const result = useMemo(() => {
-    if (state?.status !== "ready") return null;
+    if (!category || state?.status !== "ready") return null;
     // shortcut: estimateWalk is a straight-line guess; swap for Young's one-to-many routing call.
     const candidates: PlaceCandidate[] = state.places.map((p) => ({
       ...p,
@@ -78,16 +87,34 @@ export function PlaceList({ origin, onSelect }: Props) {
       walkIsEstimate: true,
     }));
     return rankPlaces(candidates, { needWashroom });
-  }, [state, origin, needWashroom]);
+  }, [state, origin, needWashroom, category]);
+
+  useEffect(() => {
+    onRanked?.(result?.ranked.map((p) => ({ id: p.id, name: p.name, location: p.location })) ?? []);
+  }, [result, onRanked]);
 
   let status = "";
-  if (!state) status = "Loading nearby cafes.";
+  if (!category) status = "";
+  else if (!state) status = "Loading nearby places.";
   else if (state.status === "error") status = `Error: ${state.message}`;
-  else if (result) status = `${result.ranked.length} cafes found.`;
+  else if (result) status = `${result.ranked.length} places found.`;
+
+  if (!category) {
+    return (
+      <div>
+        <h2 className="text-lg font-semibold">Nearby places</h2>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          Choose a category to see places ranked by wheelchair travel time.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h2 className="text-lg font-semibold">Nearby cafes</h2>
+      <h2 className="text-lg font-semibold">
+        {category ? `Nearby: ${CATEGORY_LABEL[category]}` : "Nearby places"}
+      </h2>
       <p className="mt-1 text-sm text-[var(--muted-foreground)]">
         Sorted by estimated wheelchair travel time. Times are estimates (straight line x 1.3 at 0.75
         m/s), not routed paths.

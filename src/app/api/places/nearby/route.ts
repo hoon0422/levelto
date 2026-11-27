@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
+import { CATEGORY_TYPES, categorySchema } from "./categories";
 
 export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({
+  category: categorySchema,
   origin: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }),
   radiusM: z.number().positive().max(5000),
 });
@@ -38,14 +40,18 @@ const err = (status: number, code: string, message: string) =>
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success)
-    return err(400, "INVALID_REQUEST", "Expected { origin: {lat, lng}, radiusM <= 5000 }.");
+    return err(
+      400,
+      "INVALID_REQUEST",
+      "Expected { category, origin: {lat, lng}, radiusM <= 5000 }.",
+    );
 
   const key = getServerEnv().GOOGLE_MAPS_SERVER_API_KEY;
   if (!key) return err(503, "NOT_CONFIGURED", "Place search is not configured on this server.");
   if (!takeQuota())
     return err(429, "DAILY_LIMIT", "Daily place search limit reached. Try again tomorrow.");
 
-  const { origin, radiusM } = parsed.data;
+  const { origin, radiusM, category } = parsed.data;
   let res: Response;
   try {
     res = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
@@ -56,7 +62,7 @@ export async function POST(request: Request) {
         "X-Goog-FieldMask": FIELD_MASK,
       },
       body: JSON.stringify({
-        includedPrimaryTypes: ["cafe"],
+        includedPrimaryTypes: CATEGORY_TYPES[category],
         maxResultCount: 20,
         locationRestriction: {
           circle: { center: { latitude: origin.lat, longitude: origin.lng }, radius: radiusM },
